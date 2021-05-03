@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { useQuery, useSubscription, gql } from '@apollo/client';
+import { useEffect, useState } from 'react'
+import { useQuery, useMutation, gql } from '@apollo/client';
 
 const GET_USERS = gql`
 query {
@@ -31,13 +31,31 @@ const LISTEN_POSTS = gql`
   }
 `
 
+const ADD_POST = gql`
+mutation postCreate($input: PostCreateInput!){
+  postCreate(input:$input){
+    content
+  }
+}
+`
+
 const Test = () => {
 
+  //CRUD Apollo
   const { loading, error, data } = useQuery(GET_USERS);
   const { subscribeToMore, loading: postsLoad, error: postsErr, data: allPosts } = useQuery(ALL_POSTS);
-  console.log(allPosts)
+  const [createPost] = useMutation(ADD_POST);
+
   //const { loading: subLoading, error: subErr, data: subData } = useSubscription(LISTEN_POSTS);
 
+  //post state
+  const [post, setPost] = useState("")
+
+  const handleSubmit = e => {
+    e.preventDefault()
+    createPost({variables: {input: {content: post}}})
+    setPost("")
+  }
 
   //https://www.apollographql.com/docs/react/data/subscriptions/
   useEffect(() => {
@@ -47,7 +65,7 @@ const Test = () => {
         if (!subscriptionData.data) return prev
         const newPost = subscriptionData.data.postMade
         const newObj = Object.assign({}, prev, {
-          allPosts: [newPost, ...prev.allPosts]
+          allPosts: [...prev.allPosts, newPost]
         })
         return newObj
       }
@@ -78,6 +96,17 @@ const Test = () => {
             ))}
           </div>
         }
+      </div>
+      <div className="enterPost">
+        <form onSubmit={handleSubmit}>
+          <input 
+            type="text" 
+            placeholder="Enter a message to post..." 
+            value={post}
+            onChange={e=>setPost(e.target.value)}
+            />
+          <input type='submit' value="Submit" />
+        </form>
       </div>
     </div>
   )
