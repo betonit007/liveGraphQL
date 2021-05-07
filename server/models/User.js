@@ -1,13 +1,10 @@
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        index: true,
-        unique: true
+    firstName: {
+        type: String
     },
-    name: {
+    lastName: {
         type: String
     },
     email: {
@@ -15,6 +12,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         index: true,
         unique: true
+    },
+    password: {
+        type: String,
+        required: true
     },
     images: {
         type: Array,
@@ -27,6 +28,10 @@ const userSchema = new mongoose.Schema({
     },
     about: {
         type: String
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 

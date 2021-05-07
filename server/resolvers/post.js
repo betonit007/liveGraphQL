@@ -1,34 +1,36 @@
-const { gql } = require('apollo-server-express')
 //const { authCheck } = require('../helpers/auth')
 const Post = require('../models/Post')
 const User = require('../models/User')
+const jwt = require('jsonwebtoken');
 
-const NEW_POST = "NEW_POST"
+
 //mutation for creation of a post
 const postCreate = async (parent, args, { req, pubsub }) => {      //parent mutation type
-
+    
     if (args.input.content.trim() === "") throw new Error('Content is required')
     //const currentUser = await authCheck(req)
 
+    const decoded = jwt.verify(JSON.parse(req.headers.authtoken), process.env.JWT_SECRET);
+    console.log(decoded)
     const currentUser = req.headers.email
     const currentUserMongoId = await User.findOne({
         email: currentUser
     })
-    //console.log(currentUserMongoId)
+   
     let newPost = await new Post({
         ...args.input, //should contain most of the required info for new Post
         postedBy: currentUserMongoId
     }).save()
 
     newPost.populate("postedBy", "_id username")
-    console.log('pubsub within postCreate resolver', pubsub)
+    //live update with subscriptions
     pubsub.publish("NEW_POST", { postMade: newPost })
 
     return newPost
 }
 
 const allPosts = async (parent, args) => {
-    return await Post.find({}).populate('postedBy', 'username _id').sort({ createdAt: -1 })
+    return await Post.find({}).populate('postedBy', 'username _id')//.sort({ createdAt: 1 })
 }
 
 const postsByUser = async (parent, args, { req }) => {

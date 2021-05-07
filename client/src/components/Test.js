@@ -1,19 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useMutation, gql } from '@apollo/client';
-
-const GET_USERS = gql`
-query {
-    allUsers {
-      _id
-      username
-      email
-      images {
-        url
-      }
-      about
-    }
-  }
-`;
+import { useHistory } from 'react-router-dom'
 
 const ALL_POSTS = gql`
 query {
@@ -22,7 +9,6 @@ query {
   }
 }
 `
-
 const LISTEN_POSTS = gql`
   subscription {
     postMade {
@@ -42,7 +28,6 @@ mutation postCreate($input: PostCreateInput!){
 const Test = () => {
 
   //CRUD Apollo
-  const { loading, error, data } = useQuery(GET_USERS);
   const { subscribeToMore, loading: postsLoad, error: postsErr, data: allPosts } = useQuery(ALL_POSTS);
   const [createPost] = useMutation(ADD_POST);
 
@@ -72,19 +57,16 @@ const Test = () => {
     })
   }, [])
 
+  let history = useHistory()
+
+  const authToken = localStorage.getItem('AUTH_TOKEN')
+
+  useEffect(() => {
+    if (!authToken) history.push('/login')
+  }, [authToken])
+
   return (
     <div>
-      <div className="users">
-        {loading ? <h1>Loading...</h1>
-          :
-          data.allUsers.map(user => (
-            <div key={user._id}>
-              <h1>{user.username}</h1>
-              <h4>{user.email}</h4>
-            </div>
-          ))}
-      </div>
-
       <div className="allposts">
         {postsLoad ? <h1>Loading Posts.....</h1>
           :

@@ -9,8 +9,8 @@ type Image {
 
   type User {
     _id: ID!,
-    username: String
-    name: String!
+    firstName: String,
+    lastName: String,
     email: String!,
     password: String!
     images: [Image]
@@ -19,9 +19,19 @@ type Image {
     updatedAt: String
   }
 
+  type AuthToken {
+    token: String
+  }
+
   type UserCreateResponse {
     username: String!
     email: String!
+    token: String!
+}
+
+input userCredsInput {
+  email: String!,
+  password: String!
 }
 
   #input type
@@ -46,7 +56,8 @@ type Image {
   }
 
   type Mutation {
-    userCreate: UserCreateResponse!
+    userCreate(input: userCredsInput): UserCreateResponse!
     userUpdate(input: UserUpdateInput): User!
+    userLogin(input: userCredsInput!): AuthToken!
 }
 `

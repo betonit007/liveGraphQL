@@ -32,8 +32,6 @@ const server = new ApolloServer({
     context: ({ req, res }) => ({ req, res, pubsub }),
     subscriptions: {
         onConnect: (connectionParams, webSocket, context) => {
-          console.log("XXXXXX")
-          console.log(connectionParams)
         }
     }
 });
